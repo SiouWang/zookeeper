@@ -88,30 +88,48 @@ import java.util.Set;
  * service, an application must first instantiate an object of ZooKeeper class.
  * All the iterations will be done by calling the methods of ZooKeeper class.
  * The methods of this class are thread-safe unless otherwise noted.
+ *
+ * 这是ZooKeeper客户端库的主要类。要使用ZooKeeper服务，应用程序必须首先实例化ZooKeeper类的对象。
+ * 所有迭代都将通过调用ZooKeeper类的方法来完成。除非另有说明，否则此类的方法是线程安全的。
  * <p>
  * Once a connection to a server is established, a session ID is assigned to the
  * client. The client will send heart beats to the server periodically to keep
  * the session valid.
+ *
+ * 建立与服务器的连接后，会为客户端分配会话ID。客户端将定期向服务器发送心跳以保持会话有效
  * <p>
  * The application can call ZooKeeper APIs through a client as long as the
  * session ID of the client remains valid.
+ *
+ * 只要客户端的会话ID保持有效，应用程序就可以通过客户端调用ZooKeeper API
  * <p>
  * If for some reason, the client fails to send heart beats to the server for a
  * prolonged period of time (exceeding the sessionTimeout value, for instance),
  * the server will expire the session, and the session ID will become invalid.
  * The client object will no longer be usable. To make ZooKeeper API calls, the
  * application must create a new client object.
+ *
+ * 如果由于某种原因，客户端无法长时间向服务器发送心跳（例如，超过sessionTimeout值），则服务器将
+ * 使会话到期，并且会话ID将变为无效。客户端对象将不再可用。要进行ZooKeeper API调用，应用程序必须
+ * 创建一个新的客户端对象。
  * <p>
  * If the ZooKeeper server the client currently connects to fails or otherwise
  * does not respond, the client will automatically try to connect to another
  * server before its session ID expires. If successful, the application can
  * continue to use the client.
+ *
+ * 如果客户端当前连接的ZooKeeper服务器出现故障或者没有响应，则客户端将在其会话ID到期之前自动尝试连
+ * 接到另一台服务器。如果成功，应用程序可以继续使用客户端。
  * <p>
  * The ZooKeeper API methods are either synchronous or asynchronous. Synchronous
  * methods blocks until the server has responded. Asynchronous methods just queue
  * the request for sending and return immediately. They take a callback object that
  * will be executed either on successful execution of the request or on error with
  * an appropriate return code (rc) indicating the error.
+ *
+ * ZooKeeper API方法是同步的或异步的。同步方法会阻塞，直到服务器响应。异步方法只是将发送请求排队并
+ * 立即返回。它们采用一个回调对象，该回调对象将在成功执行请求时执行，或者在错误时执行，并返回指示错误
+ * 的返回代码（rc）。
  * <p>
  * Some successful ZooKeeper API calls can leave watches on the "data nodes" in
  * the ZooKeeper server. Other successful ZooKeeper API calls can trigger those
@@ -119,15 +137,21 @@ import java.util.Set;
  * which left the watch at the first place. Each watch can be triggered only
  * once. Thus, up to one event will be delivered to a client for every watch it
  * leaves.
+ * 一些成功的ZooKeeper API调用可以将监视留在ZooKeeper服务器中的“数据节点”上。其他成功的ZooKeeper API
+ * 调用可以触发这些监视2。一旦监视被触发，事件将被传递给客户端，该客户端将监视放在首位。每个监视只能触发一次。
+ * 因此，最多会有一个事件被传递给客户端。
  * <p>
  * A client needs an object of a class implementing Watcher interface for
  * processing the events delivered to the client.
+ * 客户端需要实现Watcher接口来处理传递给客户端的事件
  *
  * When a client drops the current connection and re-connects to a server, all the
  * existing watches are considered as being triggered but the undelivered events
  * are lost. To emulate this, the client will generate a special event to tell
  * the event handler a connection has been dropped. This special event has
  * EventType None and KeeperState Disconnected.
+ * 当客户端删除当前连接并重新连接到服务器时，所有现有监视都被视为已触发，但未传递的事件将丢失。为了模拟
+ * 这个，客户端将生成一个特殊事件来告诉事件处理程序已删除连接。此特殊事件具有EventType None和KeeperState Disconnected。
  *
  */
 /*
@@ -148,6 +172,7 @@ public class ZooKeeper implements AutoCloseable {
     @Deprecated
     public static final String ZOOKEEPER_CLIENT_CNXN_SOCKET = "zookeeper.clientCnxnSocket";
     // Setting this to "true" will enable encrypted client-server communication.
+    // 将此设置为“true”将启用加密的客户机-服务器通信
 
     /**
      * @deprecated Use {@link ZKClientConfig#SECURE_CLIENT}
@@ -169,7 +194,11 @@ public class ZooKeeper implements AutoCloseable {
     /**
      * This function allows a client to update the connection string by providing 
      * a new comma separated list of host:port pairs, each corresponding to a 
-     * ZooKeeper server. 
+     * ZooKeeper server.
+     *
+     * 此函数允许客户端通过提供以逗号分隔的host:port列表来更新连接字符串，每个端口对应一个ZooKeeper服务器
+     * 例如："127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002"
+     *
      * <p>
      * The function invokes a <a href="https://issues.apache.org/jira/browse/ZOOKEEPER-1355">
      * probabilistic load-balancing algorithm</a> which may cause the client to disconnect from 
@@ -641,6 +670,9 @@ public class ZooKeeper implements AutoCloseable {
      * To create a ZooKeeper client object, the application needs to pass a
      * connection string containing a comma separated list of host:port pairs,
      * each corresponding to a ZooKeeper server.
+     *
+     * 要创建ZooKeeper客户端对象，应用程序需要传递一个连接字符串，其中包含逗号分隔的host：port
+     * 列表，每个对应一个ZooKeeper服务器
      * <p>
      * Session establishment is asynchronous. This constructor will initiate
      * connection to the server and return immediately - potentially (usually)
@@ -648,6 +680,9 @@ public class ZooKeeper implements AutoCloseable {
      * the watcher that will be notified of any changes in state. This
      * notification can come at any point before or after the constructor call
      * has returned.
+     *
+     * 会话建立是异步的。此构造函数将启动与服务器的连接并立即返回 - 可能（通常）在会话完全建立之
+     * 前。watcher参数指定将通知状态变化的观察者。此通知可以在构造函数调用返回之前或之后的任何时候到来。
      * <p>
      * The instantiated ZooKeeper client object will pick an arbitrary server
      * from the connectString and attempt to connect to it. If establishment of
@@ -655,6 +690,9 @@ public class ZooKeeper implements AutoCloseable {
      * (the order is non-deterministic, as we random shuffle the list), until a
      * connection is established. The client will continue attempts until the
      * session is explicitly closed.
+     * 实例化的ZooKeeper客户端对象将从connectString中选择一个任意服务器并尝试连接到它。如果
+     * 建立连接失败，将尝试连接字符串中的另一个服务器（顺序是非确定性的，因为我们随机地随机播放
+     * 列表），直到建立连接。客户端将继续尝试，直到会话显式关闭。
      * <p>
      * Added in 3.2.0: An optional "chroot" suffix may also be appended to the
      * connection string. This will run the client commands while interpreting
@@ -687,27 +725,6 @@ public class ZooKeeper implements AutoCloseable {
     }
 
     /**
-     * To create a ZooKeeper client object, the application needs to pass a
-     * connection string containing a comma separated list of host:port pairs,
-     * each corresponding to a ZooKeeper server.
-     * <p>
-     * Session establishment is asynchronous. This constructor will initiate
-     * connection to the server and return immediately - potentially (usually)
-     * before the session is fully established. The watcher argument specifies
-     * the watcher that will be notified of any changes in state. This
-     * notification can come at any point before or after the constructor call
-     * has returned.
-     * <p>
-     * The instantiated ZooKeeper client object will pick an arbitrary server
-     * from the connectString and attempt to connect to it. If establishment of
-     * the connection fails, another server in the connect string will be tried
-     * (the order is non-deterministic, as we random shuffle the list), until a
-     * connection is established. The client will continue attempts until the
-     * session is explicitly closed.
-     * <p>
-     * Added in 3.2.0: An optional "chroot" suffix may also be appended to the
-     * connection string. This will run the client commands while interpreting
-     * all paths relative to this root (similar to the unix chroot command).
      *
      * @param connectString
      *            comma separated host:port pairs, each corresponding to a zk
@@ -726,6 +743,7 @@ public class ZooKeeper implements AutoCloseable {
      * @param conf
      *            (added in 3.5.2) passing this conf object gives each client the flexibility of
      *            configuring properties differently compared to other instances
+     *            传递此conf对象为每个客户端提供了与其他实例相比以不同方式配置属性的灵活性
      * @throws IOException
      *             in cases of network failure
      * @throws IllegalArgumentException
