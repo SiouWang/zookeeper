@@ -37,11 +37,13 @@ import org.slf4j.LoggerFactory;
  */
 @InterfaceAudience.Public
 public final class StaticHostProvider implements HostProvider {
-    private static final Logger LOG = LoggerFactory
-            .getLogger(StaticHostProvider.class);
 
-    private List<InetSocketAddress> serverAddresses = new ArrayList<InetSocketAddress>(
-            5);
+    private static final Logger LOG = LoggerFactory.getLogger(StaticHostProvider.class);
+
+    /**
+     * 服务器列表
+     */
+    private List<InetSocketAddress> serverAddresses = new ArrayList<InetSocketAddress>(5);
 
     private Random sourceOfRandomness;
     private int lastIndex = -1;
@@ -49,15 +51,14 @@ public final class StaticHostProvider implements HostProvider {
     private int currentIndex = -1;
 
     /**
+     * 以下字段用于在重新配置期间迁移客户机
      * The following fields are used to migrate clients during reconfiguration
      */
     private boolean reconfigMode = false;
 
-    private final List<InetSocketAddress> oldServers = new ArrayList<InetSocketAddress>(
-            5);
+    private final List<InetSocketAddress> oldServers = new ArrayList<InetSocketAddress>(5);
 
-    private final List<InetSocketAddress> newServers = new ArrayList<InetSocketAddress>(
-            5);
+    private final List<InetSocketAddress> newServers = new ArrayList<InetSocketAddress>(5);
 
     private int currentIndexOld = -1;
     private int currentIndexNew = -1;
@@ -67,24 +68,23 @@ public final class StaticHostProvider implements HostProvider {
     /**
      * Constructs a SimpleHostSet.
      * 
-     * @param serverAddresses
-     *            possibly unresolved ZooKeeper server addresses
-     * @throws IllegalArgumentException
-     *             if serverAddresses is empty or resolves to an empty list
+     * @param serverAddresses 可能无法解析ZooKeeper服务器地址 possibly unresolved ZooKeeper server addresses
+     * @throws IllegalArgumentException 如果服务器地址为空或解析为空列表 if serverAddresses is empty or resolves to an empty list
      */
     public StaticHostProvider(Collection<InetSocketAddress> serverAddresses) {
+
        sourceOfRandomness = new Random(System.currentTimeMillis() ^ this.hashCode());
 
         this.serverAddresses = resolveAndShuffle(serverAddresses);
         if (this.serverAddresses.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "A HostProvider may not be empty!");
+            throw new IllegalArgumentException("A HostProvider may not be empty!");
         }       
         currentIndex = -1;
         lastIndex = -1;              
     }
 
     /**
+     * 用于测试的
      * Constructs a SimpleHostSet. This constructor is used from StaticHostProviderTest to produce deterministic test results
      * by initializing sourceOfRandomness with the same seed
      * 
@@ -94,19 +94,22 @@ public final class StaticHostProvider implements HostProvider {
      * @throws IllegalArgumentException
      *             if serverAddresses is empty or resolves to an empty list
      */
-    public StaticHostProvider(Collection<InetSocketAddress> serverAddresses,
-        long randomnessSeed) {
+    public StaticHostProvider(Collection<InetSocketAddress> serverAddresses, long randomnessSeed) {
         sourceOfRandomness = new Random(randomnessSeed);
 
         this.serverAddresses = resolveAndShuffle(serverAddresses);
         if (this.serverAddresses.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "A HostProvider may not be empty!");
+            throw new IllegalArgumentException("A HostProvider may not be empty!");
         }       
         currentIndex = -1;
         lastIndex = -1;              
     }
 
+    /**
+     * 解析服务器地址并洗牌（打乱顺序）
+     * @param serverAddresses
+     * @return
+     */
     private List<InetSocketAddress> resolveAndShuffle(Collection<InetSocketAddress> serverAddresses) {
         List<InetSocketAddress> tmpList = new ArrayList<InetSocketAddress>(serverAddresses.size());       
         for (InetSocketAddress address : serverAddresses) {
@@ -152,21 +155,20 @@ public final class StaticHostProvider implements HostProvider {
 
 
     @Override
-    public synchronized boolean updateServerList(
-            Collection<InetSocketAddress> serverAddresses,
-            InetSocketAddress currentHost) {
-        // Resolve server addresses and shuffle them
+    public synchronized boolean updateServerList(Collection<InetSocketAddress> serverAddresses, InetSocketAddress currentHost) {
+
+        // 解析ZooKeeper服务端地址并打乱他们
         List<InetSocketAddress> resolvedList = resolveAndShuffle(serverAddresses);
         if (resolvedList.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "A HostProvider may not be empty!");
+            throw new IllegalArgumentException("A HostProvider may not be empty!");
         }
-        // Check if client's current server is in the new list of servers
+
+        // 检查客户端当前使用的服务器是否在新服务器列表中
         boolean myServerInNewConfig = false;
 
         InetSocketAddress myServer = currentHost;
 
-        // choose "current" server according to the client rebalancing algorithm
+        // 根据客户端再平衡算法选择当前要使用的服务器
         if (reconfigMode) {
             myServer = next(0);
         }
@@ -183,9 +185,9 @@ public final class StaticHostProvider implements HostProvider {
             }
         }
 
+        // 判断客户端当前连接的服务器是否在新的服务器列表里面
         for (InetSocketAddress addr : resolvedList) {
-            if (addr.getPort() == myServer.getPort()
-                    && ((addr.getAddress() != null
+            if (addr.getPort() == myServer.getPort() && ((addr.getAddress() != null
                             && myServer.getAddress() != null && addr
                             .getAddress().equals(myServer.getAddress())) || addr
                             .getHostString().equals(myServer.getHostString()))) {

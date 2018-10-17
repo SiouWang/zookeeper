@@ -81,3 +81,10 @@ src/c/install-sh
 src/c/ltmain.sh
 src/c/missing
 build.xml
+bin/GitHubzookeeperdata/version-2/log.1
+bin/GitHubzookeeperdata/version-2/snapshot.0
+bin/zkServer.cmd
+bin/zkServer.cmd
+data/version-2/log.1
+data/version-2/snapshot.0
+data/version-2/snapshot.2

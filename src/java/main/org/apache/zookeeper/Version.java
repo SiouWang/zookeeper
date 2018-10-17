@@ -18,7 +18,7 @@
 
 package org.apache.zookeeper;
 
-public class Version implements org.apache.zookeeper.version.Info {
+public class Version {
 
     /*
      * Since the SVN to Git port this field doesn't return the revision anymore
@@ -28,20 +28,19 @@ public class Version implements org.apache.zookeeper.version.Info {
      */
     @Deprecated
     public static int getRevision() {
-        return REVISION;
+        return 3;
     }
 
     public static String getRevisionHash() {
-        return REVISION_HASH;
+        return "heheda-zookeeper";
     }
 
     public static String getBuildDate() {
-        return BUILD_DATE;
+        return "2018-10-17 09:27:55";
     }
 
     public static String getVersion() {
-        return MAJOR + "." + MINOR + "." + MICRO
-            + (QUALIFIER == null ? "" : "-" + QUALIFIER);
+        return "自己玩的版本...";
     }
 
     public static String getVersionRevision() {
@@ -62,7 +61,7 @@ public class Version implements org.apache.zookeeper.version.Info {
 
     /**
      * Prints the current version, revision and build date to the standard out.
-     * 
+     *
      * @param args
      *            <ul>
      *            <li> --short - prints a short version string "1.2.3"

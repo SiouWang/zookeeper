@@ -49,14 +49,12 @@ import org.slf4j.LoggerFactory;
  */
 public class ZooKeeperSaslClient {
     /**
-     * @deprecated Use {@link ZKClientConfig#LOGIN_CONTEXT_NAME_KEY}
-     *             instead.
+     * @deprecated Use {@link ZKClientConfig#LOGIN_CONTEXT_NAME_KEY} instead.
      */
     @Deprecated
     public static final String LOGIN_CONTEXT_NAME_KEY = "zookeeper.sasl.clientconfig";
     /**
-     * @deprecated Use {@link ZKClientConfig#ENABLE_CLIENT_SASL_KEY}
-     *             instead.
+     * @deprecated Use {@link ZKClientConfig#ENABLE_CLIENT_SASL_KEY} instead.
      */
     @Deprecated
     public static final String ENABLE_CLIENT_SASL_KEY = "zookeeper.sasl.client";

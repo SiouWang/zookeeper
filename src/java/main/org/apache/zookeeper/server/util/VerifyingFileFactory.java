@@ -22,6 +22,9 @@ import java.io.File;
 
 import org.slf4j.Logger;
 
+/**
+ * 文件验证工厂
+ */
 public final class VerifyingFileFactory {
 
     private final boolean warnForRelativePath;
@@ -46,18 +49,24 @@ public final class VerifyingFileFactory {
         return file;
     }
 
+    /**
+     * 判断文件路径是否存在
+     * @param file
+     */
     private void doFailForNonExistingPath(File file) {
         if (!file.exists()) {
-            throw new IllegalArgumentException(file.toString()
-                    + " file is missing");
+            throw new IllegalArgumentException(file.toString() + " file is missing");
         }
     }
 
+    /**
+     * 若为相对路径，则打印警告日志
+     * @param file
+     */
     private void doWarnForRelativePath(File file) {
         if(file.isAbsolute()) return;
         if(file.getPath().substring(0, 2).equals("."+File.separator)) return;
-        log.warn(file.getPath()+" is relative. Prepend ."
-                +File.separator+" to indicate that you're sure!");
+        log.warn(file.getPath()+" is relative. Prepend ." +File.separator+" to indicate that you're sure!");
     }
 
     public static class Builder {

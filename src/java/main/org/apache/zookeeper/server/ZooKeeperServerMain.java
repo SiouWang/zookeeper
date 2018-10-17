@@ -36,16 +36,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * 单机模式启动类，参数为配置文件
  * This class starts and runs a standalone ZooKeeperServer.
  */
 @InterfaceAudience.Public
 public class ZooKeeperServerMain {
-    private static final Logger LOG =
-        LoggerFactory.getLogger(ZooKeeperServerMain.class);
 
-    private static final String USAGE =
-        "Usage: ZooKeeperServerMain configfile | port datadir [ticktime] [maxcnxns]";
+    private static final Logger LOG = LoggerFactory.getLogger(ZooKeeperServerMain.class);
 
+    private static final String USAGE = "Usage: ZooKeeperServerMain configfile | port datadir [ticktime] [maxcnxns]";
+
+    // ZooKeeper服务器支持两种连接：加密和不加密
     // ZooKeeper server supports two kinds of connection: unencrypted and encrypted.
     private ServerCnxnFactory cnxnFactory;
     private ServerCnxnFactory secureCnxnFactory;
@@ -53,12 +54,13 @@ public class ZooKeeperServerMain {
 
     private AdminServer adminServer;
 
-    /*
+    /**
+     * 启动ZooKeeper服务
      * Start up the ZooKeeper server.
-     *
      * @param args the configfile or the port datadir [ticktime]
      */
     public static void main(String[] args) {
+
         ZooKeeperServerMain main = new ZooKeeperServerMain();
         try {
             main.initializeAndRun(args);
@@ -87,9 +89,15 @@ public class ZooKeeperServerMain {
         System.exit(0);
     }
 
-    protected void initializeAndRun(String[] args)
-        throws ConfigException, IOException, AdminServerException
-    {
+    /**
+     * 初始化并启动
+     * @param args
+     * @throws ConfigException
+     * @throws IOException
+     * @throws AdminServerException
+     */
+    protected void initializeAndRun(String[] args) throws ConfigException, IOException, AdminServerException {
+
         try {
             ManagedUtil.registerLog4jMBeans();
         } catch (JMException e) {
@@ -112,9 +120,9 @@ public class ZooKeeperServerMain {
      * @throws IOException
      * @throws AdminServerException
      */
-    public void runFromConfig(ServerConfig config)
-            throws IOException, AdminServerException {
-        LOG.info("Starting server");
+    public void runFromConfig(ServerConfig config) throws IOException, AdminServerException {
+
+        LOG.info("ZooKeeper 正在以单机模式启动.");
         FileTxnSnapLog txnLog = null;
         try {
             // Note that this thread isn't going to be doing anything else,
@@ -122,14 +130,12 @@ public class ZooKeeperServerMain {
             // run() in this thread.
             // create a file logger url from the command line args
             txnLog = new FileTxnSnapLog(config.dataLogDir, config.dataDir);
-            final ZooKeeperServer zkServer = new ZooKeeperServer(txnLog,
-                    config.tickTime, config.minSessionTimeout, config.maxSessionTimeout, null);
+            final ZooKeeperServer zkServer = new ZooKeeperServer(txnLog, config.tickTime, config.minSessionTimeout, config.maxSessionTimeout, null);
 
-            // Registers shutdown handler which will be used to know the
-            // server error or shutdown state changes.
+            // 注册关闭处理程序，该处理程序将用于了解服务器错误或关闭状态更改
+            // Registers shutdown handler which will be used to know the server error or shutdown state changes.
             final CountDownLatch shutdownLatch = new CountDownLatch(1);
-            zkServer.registerServerShutdownHandler(
-                    new ZooKeeperServerShutdownHandler(shutdownLatch));
+            zkServer.registerServerShutdownHandler(new ZooKeeperServerShutdownHandler(shutdownLatch));
 
             // Start Admin server
             adminServer = AdminServerFactory.createAdminServer();

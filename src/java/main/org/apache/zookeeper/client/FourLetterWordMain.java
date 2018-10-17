@@ -113,9 +113,7 @@ public class FourLetterWordMain {
                 sock.shutdownOutput();
             }
 
-            reader =
-                    new BufferedReader(
-                            new InputStreamReader(sock.getInputStream()));
+            reader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
             StringBuilder sb = new StringBuilder();
             String line;
             while((line = reader.readLine()) != null) {

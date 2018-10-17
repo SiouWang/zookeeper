@@ -57,7 +57,9 @@ import org.apache.zookeeper.server.util.VerifyingFileFactory;
 
 @InterfaceAudience.Public
 public class QuorumPeerConfig {
+
     private static final Logger LOG = LoggerFactory.getLogger(QuorumPeerConfig.class);
+
     private static final int UNSET_SERVERID = -1;
     public static final String nextDynamicConfigFileSuffix = ".dynamic.next";
 
@@ -72,9 +74,9 @@ public class QuorumPeerConfig {
     protected String configFileStr = null;
     protected int tickTime = ZooKeeperServer.DEFAULT_TICK_TIME;
     protected int maxClientCnxns = 60;
-    /** defaults to -1 if not set explicitly */
+    /** 如果没有显式设置，则默认为-1 */
     protected int minSessionTimeout = -1;
-    /** defaults to -1 if not set explicitly */
+    /** 如果没有显式设置，则默认为-1 */
     protected int maxSessionTimeout = -1;
     protected boolean localSessionsEnabled = false;
     protected boolean localSessionsUpgradingEnabled = false;
@@ -106,6 +108,7 @@ public class QuorumPeerConfig {
     protected int quorumCnxnThreadsSize;
 
     /**
+     * 最小快照保留计数
      * Minimum snapshot retain count.
      * @see org.apache.zookeeper.server.PurgeTxnLog#purge(File, File, int)
      */
@@ -122,12 +125,14 @@ public class QuorumPeerConfig {
     }
 
     /**
+     * 解析ZooKeeper配置文件
      * Parse a ZooKeeper configuration file
      * @param path the patch of the configuration file
      * @throws ConfigException error processing configuration
      */
     public void parse(String path) throws ConfigException {
-        LOG.info("Reading configuration from: " + path);
+
+        LOG.info("读取配置文件: " + path);
        
         try {
             File configFile = (new VerifyingFileFactory.Builder(LOG)
@@ -223,19 +228,21 @@ public class QuorumPeerConfig {
     }
 
     /**
-     * Parse config from a Properties.
+     * 从Properties对象中解析配置
      * @param zkProp Properties to parse from.
      * @throws IOException
      * @throws ConfigException
      */
-    public void parseProperties(Properties zkProp)
-    throws IOException, ConfigException {
+    public void parseProperties(Properties zkProp) throws IOException, ConfigException {
+
         int clientPort = 0;
         int secureClientPort = 0;
         String clientPortAddress = null;
         String secureClientPortAddress = null;
         VerifyingFileFactory vff = new VerifyingFileFactory.Builder(LOG).warnForRelativePath().build();
+
         for (Entry<Object, Object> entry : zkProp.entrySet()) {
+
             String key = entry.getKey().toString().trim();
             String value = entry.getValue().toString().trim();
             if (key.equals("dataDir")) {
@@ -325,33 +332,23 @@ public class QuorumPeerConfig {
         }
 
         if (!quorumEnableSasl && quorumServerRequireSasl) {
-            throw new IllegalArgumentException(
-                    QuorumAuth.QUORUM_SASL_AUTH_ENABLED
-                            + " is disabled, so cannot enable "
-                            + QuorumAuth.QUORUM_SERVER_SASL_AUTH_REQUIRED);
+            throw new IllegalArgumentException(QuorumAuth.QUORUM_SASL_AUTH_ENABLED + " is disabled, so cannot enable " + QuorumAuth.QUORUM_SERVER_SASL_AUTH_REQUIRED);
         }
         if (!quorumEnableSasl && quorumLearnerRequireSasl) {
-            throw new IllegalArgumentException(
-                    QuorumAuth.QUORUM_SASL_AUTH_ENABLED
-                            + " is disabled, so cannot enable "
-                            + QuorumAuth.QUORUM_LEARNER_SASL_AUTH_REQUIRED);
+            throw new IllegalArgumentException(QuorumAuth.QUORUM_SASL_AUTH_ENABLED + " is disabled, so cannot enable " + QuorumAuth.QUORUM_LEARNER_SASL_AUTH_REQUIRED);
         }
         // If quorumpeer learner is not auth enabled then self won't be able to
         // join quorum. So this condition is ensuring that the quorumpeer learner
         // is also auth enabled while enabling quorum server require sasl.
         if (!quorumLearnerRequireSasl && quorumServerRequireSasl) {
-            throw new IllegalArgumentException(
-                    QuorumAuth.QUORUM_LEARNER_SASL_AUTH_REQUIRED
-                            + " is disabled, so cannot enable "
-                            + QuorumAuth.QUORUM_SERVER_SASL_AUTH_REQUIRED);
+            throw new IllegalArgumentException(QuorumAuth.QUORUM_LEARNER_SASL_AUTH_REQUIRED + " is disabled, so cannot enable " + QuorumAuth.QUORUM_SERVER_SASL_AUTH_REQUIRED);
         }
 
         // Reset to MIN_SNAP_RETAIN_COUNT if invalid (less than 3)
         // PurgeTxnLog.purge(File, File, int) will not allow to purge less
         // than 3.
         if (snapRetainCount < MIN_SNAP_RETAIN_COUNT) {
-            LOG.warn("Invalid autopurge.snapRetainCount: " + snapRetainCount
-                    + ". Defaulting to " + MIN_SNAP_RETAIN_COUNT);
+            LOG.warn("Invalid autopurge.snapRetainCount: " + snapRetainCount + ". Defaulting to " + MIN_SNAP_RETAIN_COUNT);
             snapRetainCount = MIN_SNAP_RETAIN_COUNT;
         }
 
@@ -368,8 +365,7 @@ public class QuorumPeerConfig {
                 throw new IllegalArgumentException("clientPortAddress is set but clientPort is not set");
             }
         } else if (clientPortAddress != null) {
-            this.clientPortAddress = new InetSocketAddress(
-                    InetAddress.getByName(clientPortAddress), clientPort);
+            this.clientPortAddress = new InetSocketAddress(InetAddress.getByName(clientPortAddress), clientPort);
             LOG.info("clientPortAddress is {}", this.clientPortAddress.toString());
         } else {
             this.clientPortAddress = new InetSocketAddress(clientPort);
@@ -382,8 +378,7 @@ public class QuorumPeerConfig {
                 throw new IllegalArgumentException("secureClientPortAddress is set but secureClientPort is not set");
             }
         } else if (secureClientPortAddress != null) {
-            this.secureClientPortAddress = new InetSocketAddress(
-                    InetAddress.getByName(secureClientPortAddress), secureClientPort);
+            this.secureClientPortAddress = new InetSocketAddress(InetAddress.getByName(secureClientPortAddress), secureClientPort);
             LOG.info("secureClientPortAddress is {}", this.secureClientPortAddress.toString());
         } else {
             this.secureClientPortAddress = new InetSocketAddress(secureClientPort);
@@ -401,8 +396,7 @@ public class QuorumPeerConfig {
         maxSessionTimeout = maxSessionTimeout == -1 ? tickTime * 20 : maxSessionTimeout;
 
         if (minSessionTimeout > maxSessionTimeout) {
-            throw new IllegalArgumentException(
-                    "minSessionTimeout must not be larger than maxSessionTimeout");
+            throw new IllegalArgumentException("minSessionTimeout must not be larger than maxSessionTimeout");
         }          
 
         // backward compatibility - dynamic configuration in the same file as
@@ -412,14 +406,16 @@ public class QuorumPeerConfig {
             if (isDistributed() && isReconfigEnabled()) {
                 // we don't backup static config for standalone mode.
                 // we also don't backup if reconfig feature is disabled.
+                // 对于独立模式，我们不备份静态配置。
+                // 如果重新配置功能被禁用，我们也不会备份。
                 backupOldConfig();
             }
         }
     }
 
     /**
+     * 只有在没有配置SSL身份验证时才配置它
      * Configure SSL authentication only if it is not configured.
-     * 
      * @throws ConfigException
      *             If authentication scheme is configured but authentication
      *             provider is not configured.
@@ -428,11 +424,9 @@ public class QuorumPeerConfig {
         String sslAuthProp = "zookeeper.authProvider." + System.getProperty(ZKConfig.SSL_AUTHPROVIDER, "x509");
         if (System.getProperty(sslAuthProp) == null) {
             if ("zookeeper.authProvider.x509".equals(sslAuthProp)) {
-                System.setProperty("zookeeper.authProvider.x509",
-                        "org.apache.zookeeper.server.auth.X509AuthenticationProvider");
+                System.setProperty("zookeeper.authProvider.x509", "org.apache.zookeeper.server.auth.X509AuthenticationProvider");
             } else {
-                throw new ConfigException("No auth provider configured for the SSL authentication scheme '"
-                        + System.getProperty(ZKConfig.SSL_AUTHPROVIDER) + "'.");
+                throw new ConfigException("No auth provider configured for the SSL authentication scheme '" + System.getProperty(ZKConfig.SSL_AUTHPROVIDER) + "'.");
             }
         }
     }
@@ -474,8 +468,7 @@ public class QuorumPeerConfig {
             @Override
             public void write(Writer out) throws IOException {
                 Properties cfg = new Properties();
-                cfg.load( new StringReader(
-                        qv.toString()));
+                cfg.load( new StringReader(qv.toString()));
 
                 List<String> servers = new ArrayList<String>();
                 for (Entry<Object, Object> entry : cfg.entrySet()) {
